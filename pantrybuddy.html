@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>pantryBuddy</title>
+		<style>
+			.buddy{
+				width:100%;
+				height:100px;
+				background-color:red;
+				border-radius:35px;
+				margin-top:2px;
+				z-index: 1;
+				position: relative;
+			.leftComponent{
+				width:75%;
+				height:100%;
+				background-color: transparent;
+				float:left;
+				border-radius:35px 0px 0px 35px;
+				box-sizing: border-box;
+				display: flex;
+				align-items: center;
+				padding-left:20px;
+				font-size: 20px;
+				z-index: 2;
+				/*display: none;*/
+			}
+			.rightComponent{
+				width:25%;
+				height:100%;
+				background-color:transparent;
+				float:right;
+				border-radius:0px 35px 35px 0px;
+				z-index: 2;
+			}
+			.triangle {
+				width: 0;
+				height: 0;
+				border: solid 30px;
+				border-color: black transparent transparent transparent;
+				max-width: fit-content;
+				margin-left: auto;
+				margin-right: auto;
+				margin-top:2px;
+				position:sticky;
+				bottom:0;
+			}
+			.reallyBig{
+				width:100%;
+				height:100%;
+				background-color:green;
+			}
+			.myBar{
+				width:100%;
+				height:100%;
+				background-color:green;
+				border-radius:35px 35px 35px 35px;
+				position: absolute;
+			}
+			.myProgress{
+			  	width: 50%;
+			  	height: 100px;
+			  	background-color: #04AA6D;
+				border-radius:35px 0px 0px 35px;
+				position:relative;
+				z-index: 3;
+			}
+		</style>
+	</head>
+	<body>
+		<div id="button-group">
+			<div id="buddy-group">
+		</div>
+	</div>
+	<///////////////////HTML UP HERE///////////////////>
+
+	<///////////////JAVASCRIPT DOWN HERE///////////////>
+		<script>
+
+			window.getCount = function(parent, getChildrensChildren){//accepts DOM object and bool, counts children(and grandchildren) of DOM object
+				 var relevantChildren = 0;
+				 var children = parent.childNodes.length;
+					for(var i=0; i < children; i++){
+						if(parent.childNodes[i].nodeType != 3){
+						if(getChildrensChildren)
+							relevantChildren += getCount(parent.childNodes[i],true);
+							relevantChildren++;
+						}
+					}
+				return relevantChildren;
+			}
+			async function makeBuddy() {//makes a new button
+				var buddyGroup = document.getElementById("buddy-group");//get reference to button group
+				var btn = document.createElement("DIV");//make new button
+				var leftSpan = document.createElement("DIV");
+				var rightSpan = document.createElement("DIV");
+				var myBar = document.createElement("DIV");
+				var myProgress = document.createElement("DIV");
+							
+				btn.id = getCount(buddyGroup, 0);//set id to position of button
+				btn.classList.add("buddy");
+				leftSpan.onclick = function(){inputContent(btn.id);};
+				rightSpan.onclick = function(){unmakeBuddy(btn.id);};
+				//function up here//
+				///form down here///
+				leftSpan.classList.add("leftComponent");
+				rightSpan.classList.add("rightComponent");
+				myBar.classList.add("myBar");
+				myProgress.classList.add("myProgress");
+				myProgress.id = btn.id+"progress";
+
+				btn.append(leftSpan);
+				btn.append(rightSpan);
+				btn.append(myBar);
+				myBar.append(myProgress);
+
+				localStorage.setItem("button"+btn.id, btn.value);//store value in memory
+				buddyGroup.append(btn);//append button to end of group
+			}
+			async function makeTriangleBuddy(){
+				var buttonGroup = document.getElementById("button-group");//get reference to button group
+				var btn = document.createElement("DIV");//make new button
+				btn.id = "triangle"
+				//function//
+				////form////
+				btn.classList.add("triangle");
+				btn.onclick = function(){makeBuddy();};
+				buttonGroup.append(btn);
+			}
+			async function unmakeBuddy(id){
+				if(confirm("Delete buddy #"+id+"?")){
+					document.getElementById(id).remove();
+					updateBuddyIds();
+				}
+			}
+			async function updateBuddyIds(){
+
+				var buttonGroup = document.getElementById("buddy-group");
+				var children = buttonGroup.children;
+				for (var i = 0; i < children.length; i++) {					
+					children[i].id = i;
+				}
+			}
+			async function inputContent(id){
+				var btn = document.getElementById(id);
+				var foodName = prompt("Input the food type", "Generic food"); //verify input
+				//var currentDate = convertDate(Date.now());
+				var currentDate = Date.now()
+				console.log(currentDate);
+				var expirationDate = Date();
+				expirationDate = expirationDate + 86400;
+				var finalString = foodName + "|" + currentDate;
+				btn.firstChild.innerHTML = finalString;
+				btn.value = currentDate+"/"+expirationDate;;
+			}
+			function convertDate(input){
+				var utcSeconds = input;
+				console.log(input);
+				var d = new Date(0); // The 0 there is the key, which sets the date to the epoch
+				d.setUTCSeconds(utcSeconds);
+				console.log("D: "+d);
+				
+				return d;
+			}
+			async function updateProgress(id, newWidth){
+				var progress = document.getElementById(id.toString()+"progress");
+				console.log("progress: "+progress.id);	
+				//console.log("progress.width: "+window.getComputedStyle(progress, null).getPropertyValue("width"))
+				progress.style.width = newWidth.toString()+"px";
+			}
+			///////function definitions up here////////
+
+			makeBuddy();
+			makeTriangleBuddy();
+			setTimeout(function(){
+				updateProgress(0, 240);
+			}, 2000);
+
+		</script>
+	</body> 
+</html>
